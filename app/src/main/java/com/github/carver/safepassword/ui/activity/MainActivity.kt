@@ -1,0 +1,138 @@
+package com.github.carver.safepassword.ui.activity
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.carver.safepassword.data.source.local.PasswordEntity
+import com.github.carver.safepassword.ui.theme.SafePasswordTheme
+import com.github.carver.safepassword.viewmodel.MainViewModel
+
+class MainActivity : ComponentActivity() {
+    private val viewModel by viewModels<MainViewModel>()
+
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MainContent(viewModel) {
+                PasswordEditActivity.start(this, it)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadPasswords()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainContent(
+    mainViewModel: MainViewModel = viewModel(),
+    onClickListener: (PasswordEntity?) -> Unit
+) {
+    SafePasswordTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "密码本") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.surface,
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxSize(),
+            floatingActionButton = {
+                FloatingActionView {
+                    onClickListener(null)
+                }
+            }
+        ) { innerPadding ->
+            PasswordListView(innerPadding, mainViewModel, onClickListener)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FloatingActionView(onAction: () -> Unit) {
+    FloatingActionButton(
+        onClick = onAction
+    ) {
+        Icon(Icons.Default.Add, contentDescription = "Add")
+    }
+}
+
+@Composable
+fun PasswordListView(
+    innerPadding: PaddingValues,
+    mainViewModel: MainViewModel,
+    onItemClick: (PasswordEntity) -> Unit
+) {
+    val data by mainViewModel.passwordList.collectAsState(initial = emptyList())
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(innerPadding),
+    ) {
+        items(data.size) { index ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 4.dp, 0.dp, 0.dp)
+                    .clickable { onItemClick(data[index]) },
+            ) {
+                Card {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().padding(14.dp, 10.dp, 12.dp, 4.dp),
+                        text = data[index].account,
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth().padding(14.dp, 10.dp, 12.dp, 4.dp),
+                        text = data[index].category,
+                        color = Color.Blue,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}
+

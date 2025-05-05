@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">密码本</string>
+    <string name="app_title">密码本</string>
+    <string name="add_password">新增密码</string>
+
+    <string name="menu_back">返回</string>
+</resources>
