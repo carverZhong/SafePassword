@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
-    private val _passwordEntities = MutableStateFlow<List<PasswordEntity>>(emptyList())
-    val passwordList: StateFlow<List<PasswordEntity>> = _passwordEntities
+    private val _passwordMap = MutableStateFlow<Map<String, List<PasswordEntity>>>(emptyMap())
+    val passwordMap: StateFlow<Map<String, List<PasswordEntity>>> = _passwordMap
 
     init {
         loadPasswords()
@@ -23,7 +23,7 @@ class MainViewModel : ViewModel() {
             val dbList = withContext(Dispatchers.IO) {
                 PasswordDatabase.getDatabase().getPasswordDao().queryAll()
             }
-            _passwordEntities.value = dbList
+            _passwordMap.value = dbList.groupBy { it.category }
         }
     }
 

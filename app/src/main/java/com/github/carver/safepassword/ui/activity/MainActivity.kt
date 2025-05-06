@@ -6,11 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,11 +29,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -106,33 +114,82 @@ fun PasswordListView(
     mainViewModel: MainViewModel,
     onItemClick: (PasswordEntity) -> Unit
 ) {
-    val data by mainViewModel.passwordList.collectAsState(initial = emptyList())
+    val data by mainViewModel.passwordMap.collectAsState(initial = emptyMap())
+    val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(innerPadding),
+        modifier = Modifier.fillMaxSize().padding(innerPadding).background(Color.White),
     ) {
-        items(data.size) { index ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp, 4.dp, 0.dp, 0.dp)
-                    .clickable { onItemClick(data[index]) },
-            ) {
-                Card {
-                    Text(
-                        modifier = Modifier.fillMaxWidth().padding(14.dp, 10.dp, 12.dp, 4.dp),
-                        text = data[index].account,
-                        fontSize = 20.sp,
-                        color = Color.Black
-                    )
-                    Text(
-                        modifier = Modifier.fillMaxWidth().padding(14.dp, 10.dp, 12.dp, 4.dp),
-                        text = data[index].category,
-                        color = Color.Blue,
-                        fontSize = 16.sp
-                    )
+        data.entries.forEachIndexed { index, entry ->
+            item(key = entry.key) {
+                Column {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(75.dp)
+                            .clickable {
+                            expandedCategories[entry.key] = !(expandedCategories[entry.key] ?: false)
+                        },
+                        shape = RectangleShape,
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp, 10.dp, 12.dp, 4.dp),
+                            text = entry.key,
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                        )
+                        Text(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp, 4.dp, 12.dp, 4.dp),
+                            text = "共${entry.value.size}个账号",
+                            fontSize = 15.sp
+                        )
+                    }
+                    HorizontalDivider(color = Color(0xFFEEEEEE), modifier = Modifier.fillMaxWidth().height(1.dp))
+                    if (expandedCategories[entry.key] == true) {
+                        entry.value.forEachIndexed { entityIndex, entity ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(50.dp)
+                                    .background(Color(0xFFEEEEEE)),
+                                contentAlignment = Alignment.CenterStart,
+                            ){
+                                Text(
+                                    modifier = Modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
+                                    text = entity.account,
+                                    fontSize = 18.sp,
+                                )
+                            }
+                            if (entityIndex < entry.value.lastIndex) {
+                                HorizontalDivider(color = Color(0xFFEEEEEE), modifier = Modifier.fillMaxWidth().height(1.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
+//        items(data.keys.size) { index ->
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(0.dp, 4.dp, 0.dp, 0.dp)
+//                    .clickable {  },
+//            ) {
+//                Card {
+//                    Text(
+//                        modifier = Modifier.fillMaxWidth().padding(14.dp, 10.dp, 12.dp, 4.dp),
+//                        text = data[index].account,
+//                        fontSize = 20.sp,
+//                        color = Color.Black
+//                    )
+//                    Text(
+//                        modifier = Modifier.fillMaxWidth().padding(14.dp, 4.dp, 12.dp, 4.dp),
+//                        text = data[index].account,
+//                        fontSize = 15.sp
+//                    )
+//                }
+//            }
+//        }
     }
 }
 
