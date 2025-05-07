@@ -23,7 +23,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.MainActivity" android:launchMode="singleInstance"/>
-        <activity android:name=".ui.activity.AccountListActivity"/>
         <activity android:name=".ui.activity.SettingsActivity"/>
         <activity android:name=".ui.activity.PasswordEditActivity"/>
     </application>
