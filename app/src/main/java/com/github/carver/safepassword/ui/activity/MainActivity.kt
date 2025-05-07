@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -106,6 +107,7 @@ fun MainContent(
                                 } else {
                                     R.drawable.ic_list
                                 }),
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 contentDescription = "category"
                             )
                         }
@@ -118,6 +120,7 @@ fun MainContent(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_settings),
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 contentDescription = "settings"
                             )
                         }
@@ -147,9 +150,11 @@ fun MainContent(
 @Composable
 fun FloatingActionView(onAction: () -> Unit) {
     FloatingActionButton(
-        onClick = onAction
+        onClick = onAction,
     ) {
-        Icon(Icons.Default.Add, contentDescription = "Add")
+        Icon(Icons.Default.Add,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            contentDescription = "Add")
     }
 }
 
