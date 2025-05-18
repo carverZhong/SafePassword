@@ -3,8 +3,10 @@ package com.github.carver.safepassword.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.carver.safepassword.data.kv.MainPasswordManager
 import com.github.carver.safepassword.data.source.local.PasswordDatabase
 import com.github.carver.safepassword.data.source.local.PasswordEntity
+import com.github.carver.safepassword.util.EncryptUtil
 import com.github.carver.safepassword.util.ToastUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +36,14 @@ class EditViewModel(passwordEntity: PasswordEntity?) : ViewModel() {
         )
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                PasswordDatabase.getDatabase().getPasswordDao().insert(passwordEntity)
+                val passwordForInsert = PasswordEntity(
+                    category = passwordEntity.category,
+                    time = passwordEntity.time,
+                    account = passwordEntity.account,
+                    password = EncryptUtil.encrypt(passwordEntity.password, MainPasswordManager.getMainPassword()!!.toByteArray()),
+                    remark = passwordEntity.remark
+                )
+                PasswordDatabase.getDatabase().getPasswordDao().insert(passwordForInsert)
             }
             ToastUtil.show("已添加新密码")
             _canFinishActivity.value = true
@@ -59,7 +68,15 @@ class EditViewModel(passwordEntity: PasswordEntity?) : ViewModel() {
         }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                PasswordDatabase.getDatabase().getPasswordDao().update(passwordEntity)
+                val passwordForUpdate = PasswordEntity(
+                    id = passwordEntity.id,
+                    category = passwordEntity.category,
+                    time = passwordEntity.time,
+                    account = passwordEntity.account,
+                    password = EncryptUtil.encrypt(passwordEntity.password, MainPasswordManager.getMainPassword()!!.toByteArray()),
+                    remark = passwordEntity.remark
+                )
+                PasswordDatabase.getDatabase().getPasswordDao().update(passwordForUpdate)
             }
             ToastUtil.show("密码更新成功")
             _canFinishActivity.value = true

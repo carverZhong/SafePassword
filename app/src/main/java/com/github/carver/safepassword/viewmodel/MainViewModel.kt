@@ -4,8 +4,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.carver.safepassword.data.kv.MainPasswordManager
 import com.github.carver.safepassword.data.source.local.PasswordDatabase
 import com.github.carver.safepassword.data.source.local.PasswordEntity
+import com.github.carver.safepassword.util.EncryptUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +29,16 @@ class MainViewModel : ViewModel() {
     fun loadPasswords() {
         viewModelScope.launch {
             val dbList = withContext(Dispatchers.IO) {
-                PasswordDatabase.getDatabase().getPasswordDao().queryAll()
+                PasswordDatabase.getDatabase().getPasswordDao().queryAll().map {
+                    PasswordEntity(
+                        id = it.id,
+                        category = it.category,
+                        time = it.time,
+                        account = it.account,
+                        password = EncryptUtil.decrypt(it.password, MainPasswordManager.getMainPassword()!!.toByteArray()),
+                        remark = it.remark
+                    )
+                }
             }
             _passwordList.value = dbList
             _passwordMap.value = dbList.groupBy { it.category }
